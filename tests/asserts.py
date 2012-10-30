@@ -16,10 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import re
 import sys
-from StringIO import StringIO
+from io import StringIO
 from nose.tools import assert_equals, assert_not_equals
 from lettuce import registry
 from difflib import Differ
+
 
 def prepare_stdout():
     registry.clear()
@@ -27,6 +28,7 @@ def prepare_stdout():
         del sys.stdout
     std = StringIO()
     sys.stdout = std
+
 
 def prepare_stderr():
     registry.clear()

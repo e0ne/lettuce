@@ -20,8 +20,7 @@ world._set = True
 
 
 def absorb(thing, name=None):
-    if not isinstance(name, basestring):
-        name = thing.__name__
+    name = thing.__name__
 
     setattr(world, name, thing)
     return thing

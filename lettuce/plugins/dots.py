@@ -25,7 +25,7 @@ scenarios_and_its_fails = {}
 
 
 def wrt(what):
-    if isinstance(what, unicode):
+    if isinstance(what, str):
         what = what.encode('utf-8')
     sys.stdout.write(what)
 

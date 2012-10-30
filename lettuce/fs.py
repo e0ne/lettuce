@@ -40,7 +40,7 @@ class FeatureLoader(object):
             to_load = FileSystem.filename(filename, with_extension=False)
             try:
                 module = __import__(to_load)
-            except ValueError, e:
+            except ValueError as e:
                 import traceback
                 err_msg = traceback.format_exc(e)
                 if 'empty module name' in err_msg.lower():
@@ -69,6 +69,7 @@ class FileSystem(object):
     @classmethod
     def _import(cls, name):
         sys.path.insert(0, cls.current_dir())
+        print(cls.current_dir())
         fp, pathname, description = imp.find_module(name)
 
         try:
@@ -134,7 +135,7 @@ class FileSystem(object):
         """
         try:
             os.makedirs(path)
-        except OSError, e:
+        except OSError as e:
             # ignore if path already exists
             if e.errno not in (17, ):
                 raise e

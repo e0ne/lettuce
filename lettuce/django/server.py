@@ -160,7 +160,7 @@ class ThreadedServer(multiprocessing.Process):
             finally:
                 os.unlink(pidfile)
 
-        open(pidfile, 'w').write(unicode(os.getpid()))
+        open(pidfile, 'w').write(str(os.getpid()))
 
         connector = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -216,7 +216,7 @@ class Server(object):
 
     def __init__(self, address='0.0.0.0', port=None):
         self.port = int(port or getattr(settings, 'LETTUCE_SERVER_PORT', 8000))
-        self.address = unicode(address)
+        self.address = address
         self._actual_server = ThreadedServer(self.address, self.port)
 
     def start(self):
@@ -227,7 +227,7 @@ class Server(object):
             if getattr(settings, 'LETTUCE_SERVE_ADMIN_MEDIA', False):
                 msg += ' (as per settings.LETTUCE_SERVE_ADMIN_MEDIA=True)'
 
-            print "%s..." % msg
+            print("{0}...".format(msg))
 
         self._actual_server.start()
         self._actual_server.wait()
@@ -242,7 +242,7 @@ class Server(object):
                 'python manage.py --no-server' % addrport,
             )
 
-        print "Django's builtin server is running at %s:%d" % addrport
+        print("Django's builtin server is running at %s:%d" % addrport)
 
     def stop(self, fail=False):
         pid = self._actual_server.pid

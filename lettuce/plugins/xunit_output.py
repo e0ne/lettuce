@@ -23,9 +23,6 @@ from xml.dom import minidom
 
 def wrt_output(filename, content):
     f = open(filename, "w")
-    if isinstance(content, unicode):
-        content = content.encode('utf-8')
-
     f.write(content)
     f.close()
 

@@ -107,7 +107,7 @@ class Command(BaseCommand):
         if run_server:
             try:
                 server.start()
-            except LettuceServerException, e:
+            except LettuceServerException as e:
                 raise SystemExit(e)
 
         os.environ['SERVER_NAME'] = server.address
@@ -138,10 +138,10 @@ class Command(BaseCommand):
                 results.append(result)
                 if not result or result.steps != result.steps_passed:
                     failed = True
-        except SystemExit, e:
+        except SystemExit as e:
             failed = e.code
 
-        except Exception, e:
+        except Exception as e:
             failed = True
             import traceback
             traceback.print_exc(e)

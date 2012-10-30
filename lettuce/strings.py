@@ -17,11 +17,11 @@
 
 import re
 import time
-import unicodedata
+import strdata
 
 
 def escape_if_necessary(what):
-    what = unicode(what)
+    what = str(what)
     if len(what) is 1:
         what = u"[%s]" % what
 
@@ -29,8 +29,8 @@ def escape_if_necessary(what):
 
 
 def get_stripped_lines(string, ignore_lines_starting_with=''):
-    string = unicode(string)
-    lines = [unicode(l.strip()) for l in string.splitlines()]
+    string = str(string)
+    lines = [str(l.strip()) for l in string.splitlines()]
     if ignore_lines_starting_with:
         filter_func = lambda x: x and not x.startswith(
             ignore_lines_starting_with)
@@ -43,14 +43,14 @@ def get_stripped_lines(string, ignore_lines_starting_with=''):
 
 
 def split_wisely(string, sep, strip=False):
-    string = unicode(string)
+    string = str(string)
     if strip:
         string = string.strip()
     else:
         string = string.strip("\n")
-    sep = unicode(sep)
+    sep = str(sep)
 
-    regex = re.compile(escape_if_necessary(sep),  re.UNICODE | re.M | re.I)
+    regex = re.compile(escape_if_necessary(sep),  re.str | re.M | re.I)
 
     items = filter(lambda x: x, regex.split(string))
     if strip:
@@ -58,24 +58,24 @@ def split_wisely(string, sep, strip=False):
     else:
         items = [i.strip("\n") for i in items]
 
-    return [unicode(i) for i in items]
+    return [str(i) for i in items]
 
 
 def wise_startswith(string, seed):
-    string = unicode(string).strip()
-    seed = unicode(seed)
+    string = str(string).strip()
+    seed = str(seed)
     regex = u"^%s" % re.escape(seed)
     return bool(re.search(regex, string, re.I))
 
 
 def remove_it(string, what):
-    return unicode(re.sub(unicode(what), "", unicode(string)).strip())
+    return str(re.sub(str(what), "", str(string)).strip())
 
 
 def column_width(string):
     l = 0
-    for c in unicode(string):
-        if unicodedata.east_asian_width(c) in "WF":
+    for c in str(string):
+        if strdata.east_asian_width(c) in "WF":
             l += 2
         else:
             l += 1
@@ -83,23 +83,23 @@ def column_width(string):
 
 
 def rfill(string, times, char=u" ", append=u""):
-    string = unicode(string)
+    string = str(string)
     missing = times - column_width(string)
     for x in range(missing):
         string += char
 
-    return unicode(string) + unicode(append)
+    return str(string) + str(append)
 
 
 def getlen(string):
-    return column_width(unicode(string)) + 1
+    return column_width(str(string)) + 1
 
 
 def dicts_to_string(dicts, order):
-    escape = "#{%s}" % unicode(time.time())
+    escape = "#{%s}" % str(time.time())
 
     def enline(line):
-        return unicode(line).replace("|", escape)
+        return str(line).replace("|", escape)
 
     def deline(line):
         return line.replace(escape, '\\|')
@@ -108,7 +108,7 @@ def dicts_to_string(dicts, order):
     for key in keys_and_sizes:
         for data in dicts:
             current_size = keys_and_sizes[key]
-            value = unicode(data.get(key, ''))
+            value = str(data.get(key, ''))
             size = getlen(value)
             if size > current_size:
                 keys_and_sizes[key] = size
@@ -133,10 +133,10 @@ def dicts_to_string(dicts, order):
 
 
 def parse_hashes(lines):
-    escape = "#{%s}" % unicode(time.time())
+    escape = "#{%s}" % str(time.time())
 
     def enline(line):
-        return unicode(line.replace("\\|", escape)).strip()
+        return str(line.replace("\\|", escape)).strip()
 
     def deline(line):
         return line.replace(escape, '|')

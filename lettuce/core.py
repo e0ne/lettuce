@@ -39,14 +39,14 @@ fs = FileSystem()
 
 class REP(object):
     "RegEx Pattern"
-    first_of = re.compile(ur'^first_of_')
-    last_of = re.compile(ur'^last_of_')
-    language = re.compile(u"language:[ ]*([^\s]+)")
-    within_double_quotes = re.compile(r'("[^"]+")')
-    within_single_quotes = re.compile(r"('[^']+')")
+    first_of = re.compile('^first_of_')
+    last_of = re.compile('^last_of_')
+    language = re.compile("language:[ ]*([^\s]+)")
+    within_double_quotes = re.compile('("[^"]+")')
+    within_single_quotes = re.compile("('[^']+')")
     only_whitespace = re.compile('^\s*$')
-    tag_extraction_regex = re.compile(r'(?:(?:^|\s+)[@]([^@\s]+))')
-    tag_strip_regex = re.compile(ur'(?:(?:^\s*|\s+)[@]\S+\s*)+$', re.DOTALL)
+    tag_extraction_regex = re.compile('(?:(?:^|\s+)[@]([^@\s]+))')
+    tag_strip_regex = re.compile('(?:(?:^\s*|\s+)[@]\S+\s*)+$', re.DOTALL)
 
 
 class HashList(list):
@@ -96,7 +96,7 @@ class Language(object):
     def __init__(self, code=u'en'):
         self.code = code
         for attr, value in languages.LANGUAGES[code].items():
-            setattr(self, attr, unicode(value))
+            setattr(self, attr, value)
 
     def __repr__(self):
         return '<Language "%s">' % self.code
@@ -105,7 +105,7 @@ class Language(object):
         for pattern in [REP.first_of, REP.last_of]:
             if pattern.match(attr):
                 name = pattern.sub(u'', attr)
-                return unicode(getattr(self, name, u'').split(u"|")[0])
+                return getattr(self, name, u'').split(u"|")[0]
 
         return super(Language, self).__getattribute__(attr)
 
@@ -140,7 +140,7 @@ class StepDefinition(object):
         try:
             ret = self.function(self.step, *args, **kw)
             self.step.passed = True
-        except Exception, e:
+        except Exception as e:
             self.step.failed = True
             self.step.why = ReasonToFail(e)
             raise
@@ -224,7 +224,7 @@ class Step(object):
         self.proposed_method_name, self.proposed_sentence = self.propose_definition()
 
     def propose_definition(self):
-        sentence = unicode(self.original_sentence)
+        sentence = self.original_sentence
         method_name = sentence
 
         groups = [
@@ -256,7 +256,7 @@ class Step(object):
         for k, v in data.items():
 
             def evaluate(stuff):
-                return stuff.replace(u'<%s>' % unicode(k), unicode(v))
+                return stuff.replace('<%s>' % k, v)
 
             def evaluate_hash_value(hash_row):
                 new_row = {}
@@ -446,10 +446,10 @@ class Step(object):
                     step.run(ignore_case)
                     steps_passed.append(step)
 
-            except NoDefinitionFound, e:
+            except NoDefinitionFound as e:
                 steps_undefined.append(e.step)
 
-            except Exception, e:
+            except Exception as e:
                 steps_failed.append(step)
                 reasons_to_fail.append(step.why)
 
@@ -716,7 +716,7 @@ class Scenario(object):
             step.scenario = self
 
     def _find_tags_in(self, original_string):
-        broad_regex = re.compile(ur"([@].*)%s: (%s)" % (
+        broad_regex = re.compile("([@].*)%s: (%s)" % (
             self.language.scenario_separator,
             self.name), re.DOTALL)
 
@@ -725,7 +725,7 @@ class Scenario(object):
             regexes.append(broad_regex)
 
         else:
-            regexes.append(re.compile(ur"(?:%s: %s.*)([@]?.*)%s: (%s)\s*\n" % (
+            regexes.append(re.compile("(?:%s: %s.*)([@]?.*)%s: (%s)\s*\n" % (
                 self.language.non_capturable_scenario_separator,
                 self.previous_scenario.name,
                 self.language.scenario_separator,
@@ -871,8 +871,8 @@ class Background(object):
             call_hook('before_each', 'step', step)
             try:
                 results.append(step.run(ignore_case))
-            except Exception, e:
-                print e
+            except Exception as e:
+                print(e)
                 pass
 
             call_hook('after_each', 'step', step)

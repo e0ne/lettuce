@@ -26,8 +26,6 @@ scenarios_and_its_fails = {}
 
 
 def wrt(what):
-    if isinstance(what, unicode):
-        what = what.encode('utf-8')
     sys.stdout.write(what)
 
 
@@ -39,13 +37,13 @@ def print_scenario_running(scenario):
 @after.each_scenario
 def print_scenario_ran(scenario):
     if scenario.passed:
-        print "OK"
+        print("OK")
     elif scenario.failed:
         reason = scenarios_and_its_fails[scenario]
         if isinstance(reason.exception, AssertionError):
-            print "FAILED"
+            print("FAILED")
         else:
-            print "ERROR"
+            print("ERROR")
 
 
 @after.each_step

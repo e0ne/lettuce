@@ -39,7 +39,7 @@ def step(regex):
     def wrap(func):
         try:
             re.compile(regex)
-        except re.error, e:
+        except re.error as e:
             raise StepLoadingError("Error when trying to compile:\n"
                                    "  regex: %r\n"
                                    "  for function: %s\n"
