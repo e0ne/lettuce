@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
-from setuptools import setup
+from distutils.core import setup
 
 
 def get_packages():
@@ -41,7 +41,7 @@ setup(
     name='lettuce',
     version='0.2.10',
     description='Behaviour Driven Development for python',
-    author=u'Gabriel Falcao',
+    author='Gabriel Falcao',
     author_email='gabriel@nacaolivre.org',
     url='http://lettuce.it',
     packages=get_packages(),

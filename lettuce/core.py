@@ -93,9 +93,9 @@ class Language(object):
     scenario_separator = 'Scenario( Outline)?'
     background = "Background"
 
-    def __init__(self, code=u'en'):
+    def __init__(self, code='en'):
         self.code = code
-        for attr, value in languages.LANGUAGES[code].items():
+        for attr, value in list(languages.LANGUAGES[code].items()):
             setattr(self, attr, value)
 
     def __repr__(self):
@@ -104,8 +104,8 @@ class Language(object):
     def __getattr__(self, attr):
         for pattern in [REP.first_of, REP.last_of]:
             if pattern.match(attr):
-                name = pattern.sub(u'', attr)
-                return getattr(self, name, u'').split(u"|")[0]
+                name = pattern.sub('', attr)
+                return getattr(self, name, '').split("|")[0]
 
         return super(Language, self).__getattribute__(attr)
 
@@ -129,8 +129,8 @@ class StepDefinition(object):
     gets a few metadata from file, such as filename and line number"""
     def __init__(self, step, function):
         self.function = function
-        self.file = fs.relpath(function.func_code.co_filename)
-        self.line = function.func_code.co_firstlineno + 1
+        self.file = fs.relpath(function.__code__.co_filename)
+        self.line = function.__code__.co_firstlineno + 1
         self.step = step
 
     def __call__(self, *args, **kw):
@@ -169,7 +169,7 @@ class ScenarioDescription(object):
 
         for pline, part in enumerate(string.splitlines()):
             part = part.strip()
-            if re.match(u"%s:[ ]+" % language.scenario_separator + re.escape(scenario.name), part):
+            if re.match("%s:[ ]+" % language.scenario_separator + re.escape(scenario.name), part):
                 self.line = pline + 1
                 break
 
@@ -188,7 +188,7 @@ class FeatureDescription(object):
         for pline, part in enumerate(lines):
             part = part.strip()
             line = pline + 1
-            if re.match(u"(?:%s): " % language.feature, part):
+            if re.match("(?:%s): " % language.feature, part):
                 self.line = line
             else:
                 for description in description_lines:
@@ -238,7 +238,7 @@ class Step(object):
             if match_groups:
                 for index, match in enumerate(group.findall(sentence)):
                     sentence = sentence.replace(match, template)
-                    group_name = u"group%d" % (index + 1)
+                    group_name = "group%d" % (index + 1)
                     method_name = method_name.replace(match, group_name)
                     attribute_names.append(group_name)
 
@@ -253,19 +253,19 @@ class Step(object):
     def solve_and_clone(self, data):
         sentence = self.sentence
         hashes = self.hashes[:]  # deep copy
-        for k, v in data.items():
+        for k, v in list(data.items()):
 
             def evaluate(stuff):
                 return stuff.replace('<%s>' % k, v)
 
             def evaluate_hash_value(hash_row):
                 new_row = {}
-                for rkey, rvalue in hash_row.items():
+                for rkey, rvalue in list(hash_row.items()):
                     new_row[rkey] = evaluate(rvalue)
                 return new_row
 
             sentence = evaluate(sentence)
-            hashes = map(evaluate_hash_value, hashes)
+            hashes = list(map(evaluate_hash_value, hashes))
 
         new = deepcopy(self)
         new.sentence = sentence
@@ -283,10 +283,10 @@ class Step(object):
         return length
 
     def _calc_key_length(self, data):
-        return self._calc_list_length(data.keys())
+        return self._calc_list_length(list(data.keys()))
 
     def _calc_value_length(self, data):
-        return self._calc_list_length(data.values())
+        return self._calc_list_length(list(data.values()))
 
     @property
     def max_length(self):
@@ -317,14 +317,14 @@ class Step(object):
 
         if self.defined_at:
             where = self.defined_at
-        return strings.rfill(head, self.parent.feature.max_length + 1, append=u'# %s:%d\n' % (where.file, where.line))
+        return strings.rfill(head, self.parent.feature.max_length + 1, append='# %s:%d\n' % (where.file, where.line))
 
     def represent_hashes(self):
         lines = strings.dicts_to_string(self.hashes, self.keys).splitlines()
-        return u"\n".join([(u" " * self.table_indentation) + line for line in lines]) + "\n"
+        return "\n".join([(" " * self.table_indentation) + line for line in lines]) + "\n"
 
     def __repr__(self):
-        return u'<Step: "%s">' % self.sentence
+        return '<Step: "%s">' % self.sentence
 
     def _parse_remaining_lines(self, lines):
         multiline = strings.parse_multiline(lines)
@@ -334,7 +334,7 @@ class Step(object):
     def _get_match(self, ignore_case):
         matched, func = None, lambda: None
 
-        for regex, func in STEP_REGISTRY.items():
+        for regex, func in list(STEP_REGISTRY.items()):
             matched = re.search(regex, self.sentence, ignore_case and re.I or 0)
             if matched:
                 break
@@ -470,26 +470,26 @@ class Step(object):
 
         """
         invalid_first_line_error = '\nFirst line of step "%s" is in %s form.'
-        if lines and strings.wise_startswith(lines[0], u'|'):
+        if lines and strings.wise_startswith(lines[0], '|'):
             raise LettuceSyntaxError(
                 None,
                 invalid_first_line_error % (lines[0], 'table'))
 
-        if lines and strings.wise_startswith(lines[0], u'"""'):
+        if lines and strings.wise_startswith(lines[0], '"""'):
             raise LettuceSyntaxError(
                 None,
                 invalid_first_line_error % (lines[0], 'multiline'))
 
         # Select only lines that aren't end-to-end whitespace
-        lines = filter(lambda x: not REP.only_whitespace.match(x), lines)
+        lines = [x for x in lines if not REP.only_whitespace.match(x)]
 
         step_strings = []
         in_multiline = False
         for line in lines:
-            if strings.wise_startswith(line, u'"""'):
+            if strings.wise_startswith(line, '"""'):
                 in_multiline = not in_multiline
                 step_strings[-1] += "\n%s" % line
-            elif strings.wise_startswith(line, u"|") or in_multiline:
+            elif strings.wise_startswith(line, "|") or in_multiline:
                 step_strings[-1] += "\n%s" % line
             else:
                 step_strings.append(line)
@@ -568,7 +568,7 @@ class Scenario(object):
             prefix = self.language.first_of_scenario + ":"
 
         max_length = strings.column_width(
-            u"%s %s" % (prefix, self.name)) + self.indentation
+            "%s %s" % (prefix, self.name)) + self.indentation
 
         for step in self.steps:
             if step.max_length > max_length:
@@ -596,13 +596,13 @@ class Scenario(object):
         return length
 
     def _calc_key_length(self, data):
-        return self._calc_list_length(data.keys())
+        return self._calc_list_length(list(data.keys()))
 
     def _calc_value_length(self, data):
-        return self._calc_list_length(data.values())
+        return self._calc_list_length(list(data.values()))
 
     def __repr__(self):
-        return u'<Scenario: "%s">' % self.name
+        return '<Scenario: "%s">' % self.name
 
     def matches_tags(self, tags):
         if tags is None:
@@ -684,7 +684,7 @@ class Scenario(object):
             all_steps, steps_passed, steps_failed, steps_undefined, reasons_to_fail = Step.run_all(self.steps, outline, run_callbacks, ignore_case)
             skip = lambda x: x not in steps_passed and x not in steps_undefined and x not in steps_failed
 
-            steps_skipped = filter(skip, all_steps)
+            steps_skipped = list(filter(skip, all_steps))
             if outline:
                 call_hook('outline', 'scenario', self, order, outline,
                         reasons_to_fail)
@@ -736,7 +736,7 @@ class Scenario(object):
 
             if found:
                 tag_lines = found.group().splitlines()
-                tags = list(chain(*map(self._extract_tag, tag_lines)))
+                tags = list(chain(*list(map(self._extract_tag, tag_lines))))
                 return tags
 
         for regex in regexes:
@@ -758,7 +758,7 @@ class Scenario(object):
         invalid_first_line_error = '\nInvalid step on scenario "%s".\n' \
             'Maybe you killed the first step text of that scenario\n'
 
-        if lines and strings.wise_startswith(lines[0], u'|'):
+        if lines and strings.wise_startswith(lines[0], '|'):
             raise LettuceSyntaxError(
                 with_file,
                 invalid_first_line_error % self.name)
@@ -769,7 +769,7 @@ class Scenario(object):
         self.described_at = definition
 
     def represented(self):
-        make_prefix = lambda x: u"%s%s: " % (u' ' * self.indentation, x)
+        make_prefix = lambda x: "%s%s: " % (' ' * self.indentation, x)
         if self.outlines:
             prefix = make_prefix(self.language.first_of_scenario_outline)
         else:
@@ -778,7 +778,7 @@ class Scenario(object):
         head_parts = []
         if self.tags:
             tags = ['@%s' % t for t in self.tags]
-            head_parts.append(u' ' * self.indentation)
+            head_parts.append(' ' * self.indentation)
             head_parts.append(' '.join(tags) + '\n')
 
         head_parts.append(prefix + self.name)
@@ -787,7 +787,7 @@ class Scenario(object):
         appendix = ''
         if self.described_at:
             fmt = (self.described_at.file, self.described_at.line)
-            appendix = u'# %s:%d\n' % fmt
+            appendix = '# %s:%d\n' % fmt
 
         max_length = self.max_length
         if self.feature:
@@ -799,7 +799,7 @@ class Scenario(object):
 
     def represent_examples(self):
         lines = strings.dicts_to_string(self.outlines, self.keys).splitlines()
-        return "\n".join([(u" " * self.table_indentation) + line for line in lines]) + '\n'
+        return "\n".join([(" " * self.table_indentation) + line for line in lines]) + '\n'
 
     @classmethod
     def from_string(new_scenario, string,
@@ -815,7 +815,7 @@ class Scenario(object):
         if not language:
             language = Language()
 
-        splitted = strings.split_wisely(string, u"(%s):" % language.examples, True)
+        splitted = strings.split_wisely(string, "(%s):" % language.examples, True)
         string = splitted[0]
         keys = []
         outlines = []
@@ -828,7 +828,7 @@ class Scenario(object):
         scenario_line = lines.pop(0)
 
         for repl in (language.scenario_outline, language.scenario):
-            scenario_line = strings.remove_it(scenario_line, u"(%s): " % repl)
+            scenario_line = strings.remove_it(scenario_line, "(%s): " % repl)
 
         scenario = new_scenario(
             name=scenario_line,
@@ -851,8 +851,8 @@ class Background(object):
                  with_file=None,
                  original_string=None,
                  language=None):
-        self.steps = map(self.add_self_to_step, Step.many_from_lines(
-            lines, with_file, original_string))
+        self.steps = list(map(self.add_self_to_step, Step.many_from_lines(
+            lines, with_file, original_string)))
 
         self.feature = feature
         self.original_string = original_string
@@ -942,12 +942,12 @@ class Feature(object):
 
     @property
     def max_length(self):
-        max_length = strings.column_width(u"%s: %s" % (
+        max_length = strings.column_width("%s: %s" % (
             self.language.first_of_feature, self.name))
 
         if max_length == 0:
             # in case feature has two keywords
-            max_length = strings.column_width(u"%s: %s" % (
+            max_length = strings.column_width("%s: %s" % (
                 self.language.last_of_feature, self.name))
 
         for line in self.description.splitlines():
@@ -966,10 +966,10 @@ class Feature(object):
             scenario.feature = self
 
     def __repr__(self):
-        return u'<%s: "%s">' % (self.language.first_of_feature, self.name)
+        return '<%s: "%s">' % (self.language.first_of_feature, self.name)
 
     def get_head(self):
-        return u"%s: %s" % (self.language.first_of_feature, self.name)
+        return "%s: %s" % (self.language.first_of_feature, self.name)
 
     def represented(self):
         length = self.max_length + 1
@@ -977,11 +977,11 @@ class Feature(object):
         filename = self.described_at.file
         line = self.described_at.line
         head = strings.rfill(self.get_head(), length,
-                             append=u"# %s:%d\n" % (filename, line))
+                             append="# %s:%d\n" % (filename, line))
         for description, line in zip(self.description.splitlines(),
                                      self.described_at.description_at):
             head += strings.rfill(
-                u"  %s" % description, length, append=u"# %s:%d\n" % (filename, line))
+                "  %s" % description, length, append="# %s:%d\n" % (filename, line))
 
         return head
 
@@ -1053,18 +1053,18 @@ class Feature(object):
         return description, background_string
 
     def _parse_remaining_lines(self, lines, original_string, with_file=None):
-        joined = u"\n".join(lines[1:])
+        joined = "\n".join(lines[1:])
 
         # replacing occurrences of Scenario Outline, with just "Scenario"
-        scenario_prefix = u'%s:' % self.language.first_of_scenario
+        scenario_prefix = '%s:' % self.language.first_of_scenario
         regex = re.compile(
-            u"%s:\s" % self.language.scenario_separator, re.U | re.I | re.DOTALL)
+            "%s:\s" % self.language.scenario_separator, re.U | re.I | re.DOTALL)
 
         joined = regex.sub(scenario_prefix, joined)
 
         parts = strings.split_wisely(joined, scenario_prefix)
 
-        description = u""
+        description = ""
         background = None
 
         if not re.search("^" + scenario_prefix, joined):
@@ -1081,7 +1081,7 @@ class Feature(object):
 
         prefix = self.language.first_of_scenario
         upcoming_scenarios = [
-            u"%s: %s" % (prefix, s) for s in parts if s.strip()]
+            "%s: %s" % (prefix, s) for s in parts if s.strip()]
 
         kw = dict(
             original_string=original_string,
@@ -1117,10 +1117,10 @@ class Feature(object):
             shuffle(self.scenarios)
 
         if isinstance(scenarios, (tuple, list)):
-            if all(map(lambda x: isinstance(x, int), scenarios)):
+            if all([isinstance(x, int) for x in scenarios]):
                 scenarios_to_run = scenarios
         else:
-            scenarios_to_run = range(1, len(self.scenarios) + 1)
+            scenarios_to_run = list(range(1, len(self.scenarios) + 1))
 
         for index, scenario in enumerate(self.scenarios):
             if scenarios_to_run and (index + 1) not in scenarios_to_run:
