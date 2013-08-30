@@ -37,7 +37,7 @@ def get_stripped_lines(string, ignore_lines_starting_with=''):
     else:
         filter_func = lambda x: x
 
-    lines = filter(filter_func, lines)
+    lines = list(filter(filter_func, lines))
 
     return lines
 
@@ -50,7 +50,7 @@ def split_wisely(string, sep, strip=False):
         string = string.strip("\n")
     sep = str(sep)
 
-    regex = re.compile(escape_if_necessary(sep),  re.str | re.M | re.I)
+    regex = re.compile(escape_if_necessary(sep),  re.U | re.M | re.I)
 
     items = filter(lambda x: x, regex.split(string))
     if strip:
@@ -145,7 +145,7 @@ def parse_hashes(lines):
         return [line for line in lines if not line.startswith('#')]
 
     lines = discard_comments(lines)
-    lines = map(enline, lines)
+    lines = list(map(enline, lines))
 
     keys = []
     hashes = []
