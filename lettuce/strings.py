@@ -133,6 +133,9 @@ def dicts_to_string(dicts, order):
 
 
 def parse_hashes(lines):
+    # short-circuit
+    if not lines:
+        return [], []
     escape = "#{%s}" % str(time.time())
 
     def enline(line):
@@ -144,19 +147,16 @@ def parse_hashes(lines):
     def discard_comments(lines):
         return [line for line in lines if not line.startswith('#')]
 
-    lines = discard_comments(lines)
-    lines = list(map(enline, lines))
+    lines = [enline(line) for line in discard_comments(lines)]
 
     keys = []
     hashes = []
     if lines:
         first_line = lines.pop(0)
-        keys = split_wisely(first_line, u"|", True)
-        keys = map(deline, keys)
+        keys = [deline(key) for key in split_wisely(first_line, u"|", True)]
 
         for line in lines:
-            values = split_wisely(line, u"|", True)
-            values = map(deline, values)
+            values = map(deline, split_wisely(line, u"|", True))
             hashes.append(dict(zip(keys, values)))
 
     return keys, hashes
