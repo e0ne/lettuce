@@ -38,7 +38,7 @@ class ReasonToFail(object):
     def __init__(self, exc):
         self.exception = exc
         self.cause = str(exc)
-        self.traceback = traceback.format_exc(exc)
+        self.traceback = traceback.format_tb(exc.__traceback__)
 
 
 class LettuceSyntaxError(SyntaxError):

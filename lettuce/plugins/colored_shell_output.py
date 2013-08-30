@@ -117,7 +117,7 @@ def print_step_ran(step):
     if step.failed:
         wrt("\033[1;31m")
         pspaced = lambda x: wrt("%s%s" % (" " * step.indentation, x))
-        lines = step.why.traceback.splitlines()
+        lines = step.why.traceback
 
         for pindex, line in enumerate(lines):
             pspaced(line)
