@@ -17,7 +17,7 @@
 
 import re
 import time
-import strdata
+import unicodedata
 
 
 def escape_if_necessary(what):
@@ -75,7 +75,7 @@ def remove_it(string, what):
 def column_width(string):
     l = 0
     for c in str(string):
-        if strdata.east_asian_width(c) in "WF":
+        if unicodedata.east_asian_width(c) in "WF":
             l += 2
         else:
             l += 1
