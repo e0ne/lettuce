@@ -17,7 +17,7 @@
 
 import re
 import time
-import strdata
+import unicodedata
 
 
 def escape_if_necessary(what):
@@ -37,7 +37,7 @@ def get_stripped_lines(string, ignore_lines_starting_with=''):
     else:
         filter_func = lambda x: x
 
-    lines = filter(filter_func, lines)
+    lines = list(filter(filter_func, lines))
 
     return lines
 
@@ -50,7 +50,7 @@ def split_wisely(string, sep, strip=False):
         string = string.strip("\n")
     sep = str(sep)
 
-    regex = re.compile(escape_if_necessary(sep),  re.str | re.M | re.I)
+    regex = re.compile(escape_if_necessary(sep),  re.U | re.M | re.I)
 
     items = filter(lambda x: x, regex.split(string))
     if strip:
@@ -75,7 +75,7 @@ def remove_it(string, what):
 def column_width(string):
     l = 0
     for c in str(string):
-        if strdata.east_asian_width(c) in "WF":
+        if unicodedata.east_asian_width(c) in "WF":
             l += 2
         else:
             l += 1
@@ -133,6 +133,9 @@ def dicts_to_string(dicts, order):
 
 
 def parse_hashes(lines):
+    # short-circuit
+    if not lines:
+        return [], []
     escape = "#{%s}" % str(time.time())
 
     def enline(line):
@@ -144,19 +147,16 @@ def parse_hashes(lines):
     def discard_comments(lines):
         return [line for line in lines if not line.startswith('#')]
 
-    lines = discard_comments(lines)
-    lines = map(enline, lines)
+    lines = [enline(line) for line in discard_comments(lines)]
 
     keys = []
     hashes = []
     if lines:
         first_line = lines.pop(0)
-        keys = split_wisely(first_line, u"|", True)
-        keys = map(deline, keys)
+        keys = [deline(key) for key in split_wisely(first_line, u"|", True)]
 
         for line in lines:
-            values = split_wisely(line, u"|", True)
-            values = map(deline, values)
+            values = map(deline, split_wisely(line, u"|", True))
             hashes.append(dict(zip(keys, values)))
 
     return keys, hashes

@@ -23,8 +23,8 @@ world._set = False
 
 
 def _function_matches(one, other):
-    return (os.path.abspath(one.func_code.co_filename) == os.path.abspath(other.func_code.co_filename) and
-            one.func_code.co_firstlineno == other.func_code.co_firstlineno)
+    return (os.path.abspath(one.__code__.co_filename) == os.path.abspath(other.__code__.co_filename) and
+            one.__code__.co_firstlineno == other.__code__.co_firstlineno)
 
 
 class CallbackDict(dict):
@@ -86,9 +86,9 @@ def call_hook(situation, kind, *args, **kw):
     for callback in CALLBACK_REGISTRY[kind][situation]:
         try:
             callback(*args, **kw)
-        except Exception as e:
+        except Exception:
             print("=" * 1000)
-            traceback.print_exc(e)
+            traceback.print_exc()
             print("\n")
             raise
 

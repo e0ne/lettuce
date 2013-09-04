@@ -48,7 +48,7 @@ class FeatureLoader(object):
                 else:
                     raise e
 
-            reload(module)  # always take fresh meat :)
+            imp.reload(module)  # always take fresh meat :)
             sys.path.remove(root)
 
     def find_feature_files(self):
